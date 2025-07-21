@@ -45,7 +45,7 @@ export const getLatestInterviews = async (req, res) => {
 export const createInterview = async (req, res) => {
   try {
     console.log(req.body);
-    const { coverImage, finalized, level, role, techstack, type, userid } = req.body;
+    const { coverImage, finalized, level, role, techstack, type, userid, amount } = req.body;
     if (!level || !role)
       return res.status(401).json({
         success: false,

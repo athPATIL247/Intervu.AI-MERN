@@ -6,7 +6,7 @@ const API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 export const generateQuestions = async (req, res) => {
-  const {role, level, techstack, type, amount} = req.body;
+  const {role, level="Intermediate", techstack, type="mixed", amount=10} = req.body;
   try {
     const prompt = `Prepare questions for a job interview.
             The job role is ${role}.
