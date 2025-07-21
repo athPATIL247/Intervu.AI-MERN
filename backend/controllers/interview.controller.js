@@ -44,8 +44,8 @@ export const getLatestInterviews = async (req, res) => {
 
 export const createInterview = async (req, res) => {
   try {
-    const { coverImage, finalized, level, role, techstack, type, userid } =
-      req.body;
+    console.log(req.body);
+    const { coverImage, finalized, level, role, techstack, type, userid } = req.body;
     if (!level || !role)
       return res.status(401).json({
         success: false,
@@ -62,6 +62,7 @@ export const createInterview = async (req, res) => {
         amount,
       }
     );
+    console.log("Gemini response: ",response);
     const questions = response.data.questions;
     if (!questions) {
       console.log("failed fetching questions from gemini");

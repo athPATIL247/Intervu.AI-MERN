@@ -4,13 +4,6 @@ import { vapi } from "../api/vapi.sdk";
 import type { AgentProps } from "../pages/InterviewPage";
 import { useUser } from "../context/UserContext";
 
-const style = `
-  @keyframes scalePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-`;
-
 type CallStatus = "INACTIVE" | "CONNECTING" | "ACTIVE" | "FINISHED";
 
 interface SavedMessage {
@@ -92,7 +85,7 @@ const Agent = (props: AgentProps) => {
       const workflowId = import.meta.env.VITE_PUBLIC_VAPI_WORKFLOW_ID;
       await vapi.start(undefined, undefined, undefined, workflowId, {
         variableValues: {
-          username: user?.name,
+          name: user?.name,
           userid: user?._id,
         },
       });

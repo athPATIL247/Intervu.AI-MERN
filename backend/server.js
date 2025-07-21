@@ -22,14 +22,15 @@ app.get("/", (req,res) => res.status(200).json({
 app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-}));
+// app.use(cors({
+//     origin: 'http://localhost:5173',
+//     credentials: true
+// }));
+app.use(cors());
 
 // APIs
 app.use("/api/auth",authRoute);
-app.use("/api/interview",isAuthenticated,intRoute);
+app.use("/api/interview",intRoute);
 app.use("/api/gemini",isAuthenticated,gemRoute);
 
 app.listen(PORT, () => {
