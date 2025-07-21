@@ -11,9 +11,7 @@ export const AppLayout = () => {
   const handleCheck = async () => {
     try {
       const isAuthenticated = await verifyUser();
-      if (!isAuthenticated.data.success) {
-        navigate("/sign-in");
-      }
+      
     } catch (error) {
       toast.warning("You must sign in to access the portal");
       navigate("/sign-in");

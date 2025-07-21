@@ -4,7 +4,7 @@ import InterviewCard from "../components/InterviewCard";
 const Home = () => {
   return (
     <>
-        <Hero/>
+        <Hero />
         <section className="mt-20 mx-auto w-[78%]">
             <div>
                 <h1 className="font-bold text-3xl my-6">Your Interviews</h1>

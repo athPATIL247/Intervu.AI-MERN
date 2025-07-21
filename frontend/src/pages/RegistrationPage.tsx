@@ -161,7 +161,7 @@ const RegistrationPage = () => {
             className="font-semibold cursor-pointer"
             onClick={() => setIsSignUp((prev) => !prev)}
           >
-            {isSignUp ? "Sign Up" : "Sign In"}
+            {!isSignUp ? "Sign Up" : "Sign In"}
           </span>
         </p>
       </div>

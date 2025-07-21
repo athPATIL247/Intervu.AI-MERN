@@ -1,13 +1,14 @@
 import { useParams } from "react-router-dom";
 import Agent from "../components/Agent";
 
-interface InterviewPageProps {
-  type: 'generate' | 'conduct';
+export interface AgentProps {
+  type: "generate" | "conduct";
 }
 
-const InterviewPage = (props: InterviewPageProps) => {
-  const { type } = props;
+const InterviewPage = () => {
   const interviewId = useParams();
+  const type = interviewId ? "conduct" : "generate";
+  console.log("type: ",type);
   return (
     <>
       <div className="mx-auto w-[78%] flex flex-row gap-6 items-center">
@@ -38,7 +39,7 @@ const InterviewPage = (props: InterviewPageProps) => {
         <div className="px-4 py-2 text-[#cde0fe] bg-[#26282e] rounded-xl">Mixed</div>
       </div>
 
-      <Agent/>
+      <Agent type={type}/>
     </>
   );
 };

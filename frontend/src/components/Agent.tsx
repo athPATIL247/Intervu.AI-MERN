@@ -1,3 +1,8 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { vapi } from "../api/vapi.sdk";
+import type { AgentProps } from "../pages/InterviewPage";
+
 const style = `
   @keyframes scalePulse {
     0%, 100% { transform: scale(1); }
@@ -5,7 +10,77 @@ const style = `
   }
 `;
 
-const Agent = () => {
+type CallStatus = 'INACTIVE' | 'CONNECTING' | 'ACTIVE' | 'FINISHED';
+
+
+interface SavedMessage {
+    role: 'user' | 'system' | 'assistant';
+    content: string;
+}
+
+const Agent = (props: AgentProps) => {
+    const {type} =  props;
+    const navigate = useNavigate();
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [callStatus, setCallStatus] = useState<CallStatus>('INACTIVE');
+    const [messages, setMessages] = useState<SavedMessage[]>([]);
+
+    useEffect(() => {
+        const onCallStart = () => setCallStatus("ACTIVE");
+        const onCallEnd = () => setCallStatus("FINISHED");
+
+        const onSpeechStart = () => setIsSpeaking(true);
+        const onSpeechEnd = () => setIsSpeaking(false);
+
+        const onError = (error: Error) => console.log('Error ',error);
+
+        vapi.on('call-start', onCallStart);
+        vapi.on('call-end', onCallEnd);
+        vapi.on('message', (newMessage) => {
+            if(newMessage.type==='transcipt'){
+                setMessages((prev) => [...prev, newMessage]);
+            }
+        });
+        vapi.on('speech-start', onSpeechStart);
+        vapi.on('speech-end', onSpeechEnd);
+        vapi.on('error', onError);
+
+        return () => {
+            vapi.stop();
+            vapi.removeAllListeners();
+        }
+    }, []);
+
+    useEffect(() => {
+        if(callStatus === "FINISHED"){
+            if(type === 'generate') {
+                navigate('/');
+            }
+            else {
+                // handleGenerateFeedback(messages);
+            }
+        }
+    }, [messages, callStatus, type]);
+
+    // const handleCall = async () => {
+    //     setCallStatus("CONNECTING");
+
+    //     if(type=='generate'){
+    //         const workflowId = import.meta.env.VITE_PUBLIC_VAPI_WORKFLOW_ID;
+    //         await vapi.start(
+    //             undefined,
+    //             undefined,
+    //             undefined,
+    //             workflowId,
+    //             {
+    //                 variableValues: {
+    //                     username: 
+    //                 }
+    //             }
+    //         )
+    //     }
+    // }
+
     return (
         <>
             <style>

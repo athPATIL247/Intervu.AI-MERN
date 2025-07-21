@@ -65,7 +65,7 @@ export const signin = async (req, res) => {
             email: user.email,
         }
 
-        return res.status(201).cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: ONEDAY }).json({
+        return res.status(201).cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true, maxAge: ONEDAY }).json({
             success: true,
             message: "Login Successfull",
             user
@@ -81,7 +81,7 @@ export const signin = async (req, res) => {
 
 export const logout = async (_, res) => {
     try {
-        return res.cookie('token', '', { maxAge: 0 }).json({
+        return res.cookie('token', '', { maxAge: 0, sameSite: 'none', secure: true }).json({
             message: "Logged Out Successfully",
             success: true
         });
