@@ -24,3 +24,11 @@ export const logout = () => {
 export const verifyUser = () => {
     return api.get('auth/verify');
 }
+
+export const fetchLatestInterviews = () => {
+    return api.get('/interview/latest');
+}
+
+export const fetchInterviewById = (id: string) => {
+    return api.get(`/interview/${id}`);
+}

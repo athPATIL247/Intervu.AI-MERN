@@ -35,7 +35,8 @@ export const getLatestInterviews = async (req, res) => {
     const userId = req.id;
     const interviews = await Interview.find({ createdBy: { $ne: userId } })
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(10)
+      .select("coverImage createdAt finalized level role techstack type");
 
     return res.status(200).json({
       success: true,
@@ -55,7 +56,16 @@ export const getLatestInterviews = async (req, res) => {
 export const createInterview = async (req, res) => {
   try {
     console.log(req.body);
-    const { coverImage, finalized, level, role, techstack, type, userid, amount } = req.body;
+    const {
+      coverImage,
+      finalized,
+      level,
+      role,
+      techstack,
+      type,
+      userid,
+      amount,
+    } = req.body;
     if (!level || !role)
       return res.status(401).json({
         success: false,
@@ -66,7 +76,13 @@ export const createInterview = async (req, res) => {
     const normalizedType = normalizeType(type);
 
     // Use getQuestions directly instead of HTTP request
-    const questions = await getQuestions({ role, level, techstack, type: normalizedType, amount });
+    const questions = await getQuestions({
+      role,
+      level,
+      techstack,
+      type: normalizedType,
+      amount,
+    });
     if (!questions) {
       console.log("failed fetching questions from gemini");
       return res.status(500).json({
@@ -102,7 +118,7 @@ export const createInterview = async (req, res) => {
 
 export const getInterviewById = async (req, res) => {
   try {
-    const interview = await Interview.findById(req.params.id);
+    const interview = await Interview.findById(req.params.id).select("coverImage createdAt finalized level role techstack type questions");;
     if (!interview)
       return res.status(400).json({
         success: false,

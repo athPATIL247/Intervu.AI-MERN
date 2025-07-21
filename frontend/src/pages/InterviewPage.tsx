@@ -3,12 +3,12 @@ import Agent from "../components/Agent";
 
 export interface AgentProps {
   type: "generate" | "conduct";
+  interviewId?: string;
 }
 
 const InterviewPage = () => {
-  const interviewId = useParams();
-  const type = interviewId.exits ? "conduct" : "generate";
-  console.log("type: ", type);
+  const interviewId = useParams().id;
+  const type = interviewId!==undefined && interviewId.length>0 ? "conduct" : "generate";
   return (
     <>
       <div className="mx-auto w-[78%] flex flex-row gap-6 items-center">
@@ -41,7 +41,7 @@ const InterviewPage = () => {
         </div>
       </div>
 
-      <Agent type={type} />
+      <Agent type={type} interviewId={interviewId}/>
     </>
   );
 };

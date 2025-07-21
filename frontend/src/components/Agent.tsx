@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { vapi } from "../api/vapi.sdk";
+import { interviewer, vapi } from "../api/vapi.sdk";
 import type { AgentProps } from "../pages/InterviewPage";
 import { useUser } from "../context/UserContext";
+import { toast } from "react-toastify";
+import { fetchInterviewById } from "../api/api";
+import type { InterviewCardProps } from "./InterviewCard";
 
 type CallStatus = "INACTIVE" | "CONNECTING" | "ACTIVE" | "FINISHED";
 
@@ -13,11 +16,31 @@ interface SavedMessage {
 
 const Agent = (props: AgentProps) => {
   const { user } = useUser();
-  const { type } = props;
+  const { type, interviewId } = props;
   const navigate = useNavigate();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>("INACTIVE");
   const [messages, setMessages] = useState<SavedMessage[]>([]);
+  const [currInterview, setCurrInterview] = useState<InterviewCardProps>();
+
+  const getCurrentInterviewDetails = async (
+    interviewId: string | undefined
+  ) => {
+    if (type === "generate" || interviewId === undefined) return;
+    try {
+      const res = await fetchInterviewById(interviewId);
+      setCurrInterview(res.data.interview);
+    } catch (error) {
+      toast.error("Failed to load the interview");
+      navigate("/");
+      console.log("Error fetching current interview details");
+    }
+  };
+
+  useEffect(() => {
+    getCurrentInterviewDetails(interviewId);
+  }, []);
+  console.log(currInterview);
 
   useEffect(() => {
     const onCallStart = () => setCallStatus("ACTIVE");
@@ -31,7 +54,6 @@ const Agent = (props: AgentProps) => {
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
     vapi.on("message", (newMessage) => {
-
       if (newMessage.type === "transcript") {
         setMessages((prev) => [
           ...prev,
@@ -63,7 +85,7 @@ const Agent = (props: AgentProps) => {
 
     return () => {
       // vapi.stop();
-      // vapi.removeAllListeners();
+      vapi.removeAllListeners();
     };
   }, []);
 
@@ -89,7 +111,14 @@ const Agent = (props: AgentProps) => {
         },
       });
     } else {
-      // Todo: type==='conduct' logic
+        let formattedQuestions = '';
+        if(currInterview?.questions) formattedQuestions = currInterview.questions.map((q) => `- ${q}`).join(`\n`);
+
+        await vapi.start(interviewer, {
+            variableValues: {
+                questions: formattedQuestions
+            }
+        })
     }
   };
 
