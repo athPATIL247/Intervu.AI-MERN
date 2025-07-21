@@ -14,7 +14,7 @@ const Hero = () => {
           <p className="text-[#cfd3f6] text-lg mb-8">
             Practice on real interview questions & get instant feedback
           </p>
-          <button onClick={() => navigate('/interview')} className="bg-[#cfc1ff] text-black font-semibold py-3 px-6 rounded-full hover:bg-[#dfd4ff] transition">
+          <button onClick={() => navigate('/interview')} className="bg-[#cfc1ff] text-black font-semibold py-3 px-6 rounded-full hover:bg-[#dfd4ff] transition cursor-pointer">
             Start an Interview
           </button>
         </div>

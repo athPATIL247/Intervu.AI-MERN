@@ -31,7 +31,6 @@ const Agent = (props: AgentProps) => {
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
     vapi.on("message", (newMessage) => {
-      console.log("Received message:", newMessage);
 
       if (newMessage.type === "transcript") {
         setMessages((prev) => [

@@ -52,7 +52,7 @@ const InterviewCard = () => {
             <span className="text-sm">N</span>
           </div>
         </div>
-        <button className="bg-[#cfc1ff] text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-[#dfd4ff] transition">
+        <button className="bg-[#cfc1ff] text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-[#dfd4ff] transition cursor-pointer">
           View Interview
         </button>
       </div>
