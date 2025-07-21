@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+body {
+  background-color: #08090D; 
+  background-image:
+    url('/pattern.png'),
+    linear-gradient(to bottom, #0f0f0f, #000000);
+  background-blend-mode: normal, normal; 
+  background-repeat: repeat, no-repeat;
+  background-size: auto, cover;
+  background-position: top, top;
+  color: white;
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Mona Sans', sans-serif;
+}
