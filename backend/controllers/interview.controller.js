@@ -1,6 +1,16 @@
 import { Interview } from "../models/interview.model.js";
 import { getQuestions } from "./gemini.controller.js";
 
+// Normalization function for type
+function normalizeType(type) {
+  if (!type) return "mixed";
+  const t = type.toLowerCase();
+  if (t.includes("technical")) return "technical";
+  if (t.includes("behavioral")) return "behavioral";
+  if (t.includes("mixed")) return "mixed";
+  return "mixed"; // fallback
+}
+
 export const getUserInterviews = async (req, res) => {
   try {
     const userId = req.id;
@@ -52,8 +62,11 @@ export const createInterview = async (req, res) => {
         message: "All questions must be answered to create an interview",
       });
 
+    // Robust normalization for type
+    const normalizedType = normalizeType(type);
+
     // Use getQuestions directly instead of HTTP request
-    const questions = await getQuestions({ role, level, techstack, type, amount });
+    const questions = await getQuestions({ role, level, techstack, type: normalizedType, amount });
     if (!questions) {
       console.log("failed fetching questions from gemini");
       return res.status(500).json({
@@ -69,7 +82,7 @@ export const createInterview = async (req, res) => {
       questions,
       role,
       techstack,
-      type,
+      type: normalizedType,
       createdBy: userid,
     });
 
