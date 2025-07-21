@@ -57,12 +57,15 @@ export const signin = async (req, res) => {
 
         if (!process.env.SECRET_KEY) throw new Error("Missing SECRET_KEY in .env");
 
+        const interviews = await Interview.find({createdBy: user._id})
+
         const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1d' });
 
         user = {
             _id: user._id,
             name: user.name,
             email: user.email,
+            interviews
         }
 
         return res.status(201).cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true, maxAge: ONEDAY }).json({

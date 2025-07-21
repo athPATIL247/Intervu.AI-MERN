@@ -7,8 +7,8 @@ export interface AgentProps {
 
 const InterviewPage = () => {
   const interviewId = useParams();
-  const type = interviewId ? "conduct" : "generate";
-  console.log("type: ",type);
+  const type = interviewId.exits ? "conduct" : "generate";
+  console.log("type: ", type);
   return (
     <>
       <div className="mx-auto w-[78%] flex flex-row gap-6 items-center">
@@ -36,10 +36,12 @@ const InterviewPage = () => {
             />
           </div>
         </div>
-        <div className="px-4 py-2 text-[#cde0fe] bg-[#26282e] rounded-xl">Mixed</div>
+        <div className="px-4 py-2 text-[#cde0fe] bg-[#26282e] rounded-xl">
+          Mixed
+        </div>
       </div>
 
-      <Agent type={type}/>
+      <Agent type={type} />
     </>
   );
 };

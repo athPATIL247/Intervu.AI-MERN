@@ -1,5 +1,5 @@
 import { Interview } from "../models/interview.model.js";
-import { generateQuestions } from "./gemini.controller.js";
+import axios from "axios";
 
 export const getUserInterviews = async (req, res) => {
   try {
@@ -44,14 +44,32 @@ export const getLatestInterviews = async (req, res) => {
 
 export const createInterview = async (req, res) => {
   try {
-    const userId = req.id;
-    const { coverImage, finalized, level, role, techstack, type, questions } = req.body;
-
-    if (!level || !questions || !role)
+    const { coverImage, finalized, level, role, techstack, type, userid } =
+      req.body;
+    if (!level || !role)
       return res.status(401).json({
         success: false,
         message: "All questions must be answered to create an interview",
       });
+
+    const response = await axios.post(
+      "https://intervu-ai-backend.onrender.com/api/gemini/generate-questions",
+      {
+        role,
+        level,
+        techstack,
+        type,
+        amount,
+      }
+    );
+    const questions = response.data.questions;
+    if (!questions) {
+      console.log("failed fetching questions from gemini");
+      return res.status(500).json({
+        success: false,
+        message: "Gemini failure",
+      });
+    }
 
     const interview = await Interview.create({
       coverImage,
@@ -61,7 +79,7 @@ export const createInterview = async (req, res) => {
       role,
       techstack,
       type,
-      createdBy: userId,
+      createdBy: userid,
     });
 
     return res.status(201).json({

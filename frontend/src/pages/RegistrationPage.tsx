@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { signin, signup, verifyUser } from "../api/api";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 export interface RegistrationFormData {
   name: string;
@@ -12,6 +13,7 @@ export interface RegistrationFormData {
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<RegistrationFormData>({
@@ -46,6 +48,8 @@ const RegistrationPage = () => {
     try {
       const res = await (isSignUp ? signup(cleanedData) : signin(cleanedData));
       if (res.data.success) {
+        // console.log(res.data);
+        setUser(res.data.user);
         toast.success(res.data.message);
         isSignUp ? setIsSignUp(false) : navigate("/");
       } else {
