@@ -5,7 +5,13 @@ dotenv.config();
 const API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// Reusable function to generate questions
+const MODEL_PRIORITY = [
+  "gemini-2.0-flash-001", // preferred model
+  "gemini-pro",           // fallback 1
+  "gemini-1.5-flash"      // fallback 2 (if available)
+];
+
+// Reusable function to generate questions with fallback logic
 export const getQuestions = async ({ role, level = "Intermediate", techstack, type = "mixed", amount = 10 }) => {
   const prompt = `Prepare questions for a job interview.
             The job role is ${role}.
@@ -20,12 +26,23 @@ export const getQuestions = async ({ role, level = "Intermediate", techstack, ty
 
             Thank you! <3`;
 
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
-  const result = await model.generateContent(prompt);
-  const response = result.response;
-  const text = response.text();
-  const questions = JSON.parse(text);
-  return questions;
+  let lastError;
+  for (const modelName of MODEL_PRIORITY) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      const text = response.text();
+      const questions = JSON.parse(text);
+      return questions;
+    } catch (error) {
+      lastError = error;
+      // Only retry on 503 (Service Unavailable)
+      if (error.status !== 503) throw error;
+    }
+  }
+  // If all models fail, throw the last error
+  throw lastError;
 };
 
 export const generateQuestions = async (req, res) => {
