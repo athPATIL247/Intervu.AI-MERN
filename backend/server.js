@@ -6,6 +6,7 @@ import { connectDB } from "./utils/connect.js";
 import authRoute from "./routes/auth.route.js"
 import intRoute from "./routes/interview.route.js"
 import gemRoute from "./routes/gemini.route.js"
+import feedbackRoute from "./routes/feedback.route.js"
 import isAuthenticated from "./middlewares/auth.middleware.js";
 
 dotenv.config();
@@ -49,6 +50,7 @@ app.use(cors({
 app.use("/api/auth",authRoute);
 app.use("/api/interview",intRoute);
 app.use("/api/gemini",isAuthenticated,gemRoute);
+app.use("/api/feedback", feedbackRoute);
 
 app.listen(PORT, () => {
     connectDB(process.env.MONGO_URI);

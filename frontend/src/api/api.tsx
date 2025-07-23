@@ -32,3 +32,8 @@ export const fetchLatestInterviews = () => {
 export const fetchInterviewById = (id: string) => {
     return api.get(`/interview/${id}`);
 }
+
+// Fetch feedback for a given interview and user
+export const fetchFeedbackByInterviewAndUser = (interviewId: string, userId: string) => {
+    return api.get(`/feedback?interviewId=${interviewId}&userId=${userId}`);
+}

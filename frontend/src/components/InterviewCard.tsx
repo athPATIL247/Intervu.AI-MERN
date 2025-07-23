@@ -1,11 +1,14 @@
-import dayjs from "dayjs"
+import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useUser } from "../context/UserContext";
+import { fetchFeedbackByInterviewAndUser } from "../api/api";
 
 export interface InterviewCardProps {
-  coverImage: string,
-  createdAt?: string,
-  finalized: boolean,
-  level: string,
+  coverImage: string;
+  createdAt?: string;
+  finalized: boolean;
+  level: string;
   role: string;
   techstack: string[];
   type: string;
@@ -20,17 +23,52 @@ function capitalize(word: string) {
 function capitalizeSentence(sentence: string) {
   return sentence
     .split(" ")
-    .map(word => capitalize(word))
+    .map((word) => capitalize(word))
     .join(" ");
 }
 
 const InterviewCard = (props: InterviewCardProps) => {
   const navigate = useNavigate();
-  const {coverImage, createdAt, finalized, level, role, techstack, type, _id} = props.details!;
+  const { user } = useUser();
+  const {
+    coverImage,
+    createdAt,
+    finalized,
+    level,
+    role,
+    techstack,
+    type,
+    _id,
+  } = props.details!;
 
-  const handleViewInterviewClick = (_id: string) => {
-    navigate(`/interview/${_id}`);
-  }
+  const [hasFeedback, setHasFeedback] = useState(false);
+  const [feedbackId, setFeedbackId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkFeedback = async () => {
+      if (!_id || !user?._id) return;
+      try {
+        const res = await fetchFeedbackByInterviewAndUser(_id, user._id);
+        if (res.data.success && res.data.feedback) {
+          setHasFeedback(true);
+          setFeedbackId(res.data.feedback._id);
+        } else {
+          setHasFeedback(false);
+        }
+      } catch {
+        setHasFeedback(false);
+      }
+    };
+    checkFeedback();
+  }, [_id, user?._id]);
+
+  const handleButtonClick = (_id: string) => {
+    if (hasFeedback && feedbackId) {
+      navigate(`/interview/${_id}/feedback`);
+    } else {
+      navigate(`/interview/${_id}`);
+    }
+  };
 
   return (
     <div className="relative bg-gradient-to-b from-[#1b1c20] to-[#08090d] text-white rounded-2xl p-6 w-full max-w-sm border-2 border-[#4c4d4f] shadow-lg">
@@ -48,14 +86,14 @@ const InterviewCard = (props: InterviewCardProps) => {
 
       {/* Title */}
       <h2 className="text-2xl font-bold mb-2 leading-tight">
-        {capitalizeSentence(role) } Interview
+        {capitalizeSentence(role)} Interview
       </h2>
 
       {/* Date & Score */}
       <div className="flex items-center text-md text-gray-300 mb-4 space-x-4">
         <div className="flex items-center">
           <span className="mr-1">📅</span>
-          <span>{dayjs(createdAt || Date.now()).format('MMM D, YYYY')}</span>
+          <span>{dayjs(createdAt || Date.now()).format("MMM D, YYYY")}</span>
         </div>
         <div className="flex items-center">
           <span className="mr-1">⭐</span>
@@ -69,17 +107,18 @@ const InterviewCard = (props: InterviewCardProps) => {
       </p>
 
       {/* Footer icons + button */}
-      <div className="flex items-center justify-between">
-        <div className="flex space-x-2">
-          <div className="w-8 h-8 bg-[#1a1a1a] rounded-full flex items-center justify-center">
-            {/* Replace with an actual icon if needed */}
-            <span className="text-sm">N</span>
-          </div>
+      <div className="flex space-x-2">
+        <div className="w-8 h-8 bg-[#1a1a1a] rounded-full flex items-center justify-center">
+          {/* Replace with an actual icon if needed */}
+          <span className="text-sm">N</span>
         </div>
-        <button onClick={() => handleViewInterviewClick(_id)} className="bg-[#cfc1ff] text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-[#dfd4ff] transition cursor-pointer">
-          View Interview
-        </button>
       </div>
+      <button
+        onClick={() => handleButtonClick(_id)}
+        className="absolute bottom-4 right-4 bg-[#cfc1ff] text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-[#dfd4ff] transition cursor-pointer"
+      >
+        {hasFeedback ? "View Feedback" : "View Interview"}
+      </button>
     </div>
   );
 };

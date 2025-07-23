@@ -4,8 +4,6 @@ import { interviewer, vapi } from "../api/vapi.sdk";
 import type { AgentProps } from "../pages/InterviewPage";
 import { useUser } from "../context/UserContext";
 import { toast } from "react-toastify";
-import { fetchInterviewById } from "../api/api";
-import type { InterviewCardProps } from "./InterviewCard";
 
 type CallStatus = "INACTIVE" | "CONNECTING" | "ACTIVE" | "FINISHED";
 
@@ -16,31 +14,11 @@ interface SavedMessage {
 
 const Agent = (props: AgentProps) => {
   const { user } = useUser();
-  const { type, interviewId } = props;
+  const { type, interviewId, currInterview } = props;
   const navigate = useNavigate();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>("INACTIVE");
   const [messages, setMessages] = useState<SavedMessage[]>([]);
-  const [currInterview, setCurrInterview] = useState<InterviewCardProps>();
-
-  const getCurrentInterviewDetails = async (
-    interviewId: string | undefined
-  ) => {
-    if (type === "generate" || interviewId === undefined) return;
-    try {
-      const res = await fetchInterviewById(interviewId);
-      setCurrInterview(res.data.interview);
-    } catch (error) {
-      toast.error("Failed to load the interview");
-      navigate("/");
-      console.log("Error fetching current interview details");
-    }
-  };
-
-  useEffect(() => {
-    getCurrentInterviewDetails(interviewId);
-  }, []);
-  console.log(currInterview);
 
   useEffect(() => {
     const onCallStart = () => setCallStatus("ACTIVE");
@@ -89,15 +67,35 @@ const Agent = (props: AgentProps) => {
     };
   }, []);
 
+  const handleGenerateFeedback = async (messages: SavedMessage[]) => {
+    const response = await fetch(`/api/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        interviewId: interviewId!,
+        userId: user?._id!,
+        transcript: messages,
+      }),
+    });
+
+    const result = await response.json();
+    if (result.success && result.feedbackId)
+      navigate(`/interview/${interviewId}/feedback`);
+    else {
+      toast.error("Error saving feedback");
+      navigate("/");
+    }
+  };
+
   useEffect(() => {
     if (callStatus === "FINISHED") {
       if (type === "generate") {
         navigate("/");
       } else {
-        // handleGenerateFeedback(messages);
+        handleGenerateFeedback(messages);
       }
     }
-  }, [messages, callStatus, type]);
+  }, [messages, callStatus, type, user?._id]);
 
   const handleCall = async () => {
     setCallStatus("CONNECTING");
@@ -111,14 +109,17 @@ const Agent = (props: AgentProps) => {
         },
       });
     } else {
-        let formattedQuestions = '';
-        if(currInterview?.questions) formattedQuestions = currInterview.questions.map((q) => `- ${q}`).join(`\n`);
+      let formattedQuestions = "";
+      if (currInterview?.questions)
+        formattedQuestions = currInterview.questions
+          .map((q) => `- ${q}`)
+          .join(`\n`);
 
-        await vapi.start(interviewer, {
-            variableValues: {
-                questions: formattedQuestions
-            }
-        })
+      await vapi.start(interviewer, {
+        variableValues: {
+          questions: formattedQuestions,
+        },
+      });
     }
   };
 
@@ -129,8 +130,6 @@ const Agent = (props: AgentProps) => {
   };
 
   const lastMessage = messages[messages.length - 1]?.content;
-  const isCallInactiveOrFinished =
-    callStatus === "INACTIVE" || callStatus === "FINISHED";
 
   const renderButton = () => {
     if (callStatus === "INACTIVE" || callStatus === "FINISHED") {
@@ -212,7 +211,7 @@ const Agent = (props: AgentProps) => {
             </h1>
           </div>
 
-          <div className="w-[50%] h-full bg-gradient-to-b from-[#151530] to-[#07090d] border border-gray-800 rounded-2xl flex flex-col items-center justify-center gap-6">
+          <div className="hidden sm:flex w-[50%] h-full bg-gradient-to-b from-[#151530] to-[#07090d] border border-gray-800 rounded-2xl flex-col items-center justify-center gap-6">
             <div>
               <img src="/user-avatar.png" alt="" height={140} width={140} />
             </div>
